@@ -31,7 +31,3 @@ exclude = ["venv", ".venv", "dist", "__pycache__"]
 [tool.ruff.lint]
 select = ["E", "F", "W"]
 ignore = []
-
-[tool.ruff.format]
-docstring-code-format = true
-quote-style = "double"

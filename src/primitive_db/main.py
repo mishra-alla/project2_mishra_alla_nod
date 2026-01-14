@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Main module for the primitive database project."""
-
 from src.primitive_db.engine import run
 
 

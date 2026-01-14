@@ -11,7 +11,6 @@ def load_metadata(filepath='db_meta.json'):
     except FileNotFoundError:
         return {}
 
-
 def save_metadata(data, filepath='db_meta.json'):
     """сохранение данных в json"""
     with open(filepath, 'w', encoding='utf-8') as f:
