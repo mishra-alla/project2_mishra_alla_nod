@@ -28,20 +28,20 @@
 ### Примеры команд:
 ```
 # создание записи
-insert into users values ("J", 30, true)
+insert into users values ("Sergei", 28, true)
 
 # выборка данных
 select from users
-select from users where age = 30
-select from users where name = "J"
+select from users where age = 28
+select from users where name = "Sergei"
 
 # обновление данных
-update users set age = 36 where name = "J"
-update users set age = 36 where name="J"
+update users set age = 28 where name = "Sergei"
+update users set age = 28 where name="Sergei"
 
 # удаление данных
 delete from users where ID = 1
-delete from users where name = "J"
+delete from users where name = "Sergei"
 ```
 
 ## Обработка ошибок:
