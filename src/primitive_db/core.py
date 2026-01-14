@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
+"""Core functionality for the primitive database."""
+
 import json
 import os
 from prettytable import PrettyTable
 from .decorators import handle_db_errors, confirm_action, log_time, query_cacher
-
-# Поддерживаемые типы данных
-SUPPORTED_TYPES = {"int", "str", "bool"}
-
+from .constants import VALID_TYPES
 
 @handle_db_errors
 def create_table(metadata, table_name, columns):
-    """
-    создание таблицы
-    """
+    """создание таблицы"""
     if table_name in metadata:
         print(f'Ошибка: Таблица "{table_name}" уже существует.')
         return None
@@ -23,9 +20,11 @@ def create_table(metadata, table_name, columns):
             print(f"Некорректное значение: {col}. Формат: имя:тип")
             return None
         name, dtype = col.split(":", 1)
-        if not name or dtype not in SUPPORTED_TYPES:
-            print(f"Некорректное значение: {col}.\
-                Тип должен быть int, str или bool.")
+        if not name or dtype not in VALID_TYPES:
+            print(
+                f"Некорректное значение: {col}.\
+                Тип должен быть int, str или bool."
+            )
             return None
         parsed_columns.append(f"{name}:{dtype}")
 
@@ -34,7 +33,7 @@ def create_table(metadata, table_name, columns):
     metadata[table_name] = final_columns
     print(
         f'Таблица "{table_name}" успешно создана'
-        f' со столбцами: {", ".join(final_columns)}'
+        f" со столбцами: {', '.join(final_columns)}"
     )
     return metadata
 

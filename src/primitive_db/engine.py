@@ -2,44 +2,23 @@
 """Engine module for the primitive database."""
 
 import shlex
+from .constants import HELP_TEXT
 from .core import (
     create_table,
-    delete,
     drop_table,
-    info,
-    insert,
     list_tables,
+    insert,
     select,
     update,
+    delete,
+    info,
 )
 from .utils import load_metadata, save_metadata
 
 
 def print_help():
     """справочная информация"""
-    print("\nОперации с данными")
-    print("Функции:")
-    print("<command> create_table <имя_таблицы> <столбец1:тип> "
-        "<столбец2:тип> ... - создать таблицу"
-    )
-    print("<command> list_tables - показать список всех таблиц")
-    print("<command> drop_table <имя_таблицы> - удалить таблицу")
-    print("<command> insert into <имя_таблицы> values "
-            "(<значение1>, <значение2>, ...) - создать запись."
-    )
-    print("<command> select from <имя_таблицы> " \
-            "where <столбец> = <значение> - прочитать записи по условию."
-    )
-    print("<command> select from <имя_таблицы> - прочитать все записи.")
-    print("<command> update <имя_таблицы> set <столбец1> = <новое_значение1> " \
-            "where <столбец_условия> = <значение_условия> - обновить запись."
-    )
-    print("<command> delete from <имя_таблицы> where <столбец> = <значение> - " \
-            "удалить запись."
-    )
-    print("<command> info <имя_таблицы> - вывести информацию о таблице.")
-    print("<command> exit - выход из программы")
-    print("<command> help - справочная информация\n")
+    print(HELP_TEXT)
 
 
 def run():
@@ -60,8 +39,9 @@ def run():
 
             if command == "create_table":
                 if len(args) < 3:
-                    print("Недостаточно аргументов. Формат: " \
-                            "create_table <имя> <столбец:тип> ..."
+                    print(
+                        "Недостаточно аргументов. Формат: "
+                        "create_table <имя> <столбец:тип> ..."
                     )
                     continue
                 table_name = args[1]
@@ -88,25 +68,30 @@ def run():
                     or args[1].lower() != "into"
                     or args[3].lower() != "values"
                 ):
-                    print("Неверный формат. Используйте: insert into <таблица> " \
-                    "values (<значение1>, <значение2>, ...)")
+                    print(
+                        "Неверный формат. Используйте: "
+                        "insert into <таблица> values (<значение1>, <значение2>, ...)"
+                    )
                     continue
 
                 table_name = args[2]
                 values_str = " ".join(args[4:])
 
-                # Извлекаем значения из скобок
-                if values_str.startswith("(") and values_str.endswith(")"):
-                    values_str = values_str[1:-1]
-                    values = [v.strip() for v in values_str.split(",")]
-                    insert(metadata, table_name, values)
-                else:
+                # Используем парсер
+                from .parser import parse_values
+
+                values = parse_values(values_str)
+                if values is None:
                     print("Значения должны быть в скобках.")
+                    continue
+
+                insert(metadata, table_name, values)
 
             elif command == "select":
                 if len(args) < 3 or args[1].lower() != "from":
-                    print("Неверный формат. Используйте: " \
-                    "select from <таблица> [where <условие>]"
+                    print(
+                        "Неверный формат. Используйте: select from "
+                        "<таблица> [where <условие>]"
                     )
                     continue
 
@@ -120,8 +105,9 @@ def run():
 
             elif command == "update":
                 if len(args) < 6:
-                    print("Неверный формат. Используйте: " \
-                    "update <таблица> set <столбец>=<значение> where <условие>"
+                    print(
+                        "Неверный формат. Используйте: "
+                        "update <таблица> set <столбец>=<значение> where <условие>"
                     )
                     continue
 
@@ -136,8 +122,9 @@ def run():
                 )
 
                 if set_idx == -1 or where_idx == -1:
-                    print("Неверный формат. Используйте: " \
-                    "update <таблица> set <столбец>=<значение> where <условие>"
+                    print(
+                        "Неверный формат. Используйте: update <таблица> "
+                        "set <столбец>=<значение> where <условие>"
                     )
                     continue
 
@@ -148,8 +135,9 @@ def run():
 
             elif command == "delete":
                 if len(args) < 4:
-                    print("Неверный формат. Используйте: " \
-                    "delete from <таблица> where <условие>"
+                    print(
+                        "Неверный формат. Используйте: delete "
+                        "from <таблица> where <условие>"
                     )
                     continue
 

@@ -4,6 +4,14 @@ install:
 project:
 	poetry run project
 
+project:  # Оставляем для обратной совместимости
+	poetry run database
+
+database:  # Новое правило
+	poetry run database
+
+run: database
+
 build:
 	poetry build
 

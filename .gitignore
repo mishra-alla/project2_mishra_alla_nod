@@ -56,3 +56,6 @@ demo*.py
 # Временные файлы
 db_meta.json
 data/
+
+# Backup directory
+backup/
