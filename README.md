@@ -4,18 +4,18 @@
 ## Управление таблицами
 **Команды:**
 
-- `create_table` `<имя_таблицы> <столбец1:тип> <столбец2:тип> ...` — создать таблицу, автоматически добавляется столбец `ID:int`;
-- `drop_table` `<имя_таблицы>` — удалить таблицу;
-- `list_tables` — показать все таблицы;
-- `help` — справка;
-- `exit` — выход.
+- `create_table` `<имя_таблицы> <столбец1:тип> <столбец2:тип> ...` — создать таблицу, автоматически добавляется столбец `ID:int`
+- `drop_table` `<имя_таблицы>` — удалить таблицу
+- `list_tables` — показать все таблицы
+- `help` — справка
+- `exit` — выход
 
 ### Поддерживаемые типы данных: `int`, `str`, `bool`.
 
 ## Пример использования - Управление таблицами:
 
 
-## CRUD-операции:
+## CRUD-операции (в разработке):
 **Команды:**
 - `insert into <имя_таблицы> values (<значение1>, <значение2>, ...)` — создать запись в таблице;
 - `select from <имя_таблицы>` — прочитать все записи таблицы;
@@ -23,37 +23,31 @@
 - `update <имя_таблицы> set <столбец> = <новое_значение> where <столбец> = <значение>` — обновить запись в таблице;
 - `delete from <имя_таблицы> where <столбец> = <значение>` — удалить запись из таблицы по условию.
 
-## Пример использования CRUD-операции:
+## Пример использования CRUD-операции: (в разработке)
 
 ### Примеры команд:
 ```
 # создание записи
-insert into users values ("John", 25, true)
+insert into users values ("J", 30, true)
 
 # выборка данных
 select from users
-select from users where age = 25
-select from users where name = "John"
+select from users where age = 30
+select from users where name = "J"
 
 # обновление данных
-update users set age = 26 where name = "John"
-update users set age = 26 where name="John"
+update users set age = 36 where name = "J"
+update users set age = 36 where name="J"
 
 # удаление данных
 delete from users where ID = 1
-delete from users where name = "John"
+delete from users where name = "J"
 ```
 
 ## Обработка ошибок:
 - `KeyError` - обращение к несуществующим таблицам
 - `ValueError` - ошибки валидации типов данных
 - `FileNotFoundError` - проблемы с файлами данных
-
-## Декораторы:
-- `@log_time` - учет времени выполнения
-- `@handle_db_errors` - обработка исключений
-- `@confirm_action("операция")` - подтверждение действий
-- кэш хранится в замыкании?
 
 ## Архитектура проекта:
 Проект состоит из следующих модулей:
@@ -67,12 +61,19 @@ delete from users where name = "John"
 ## Структура проекта:
 ```
 project2_Mishra_Alla_nod/
-├── src/primitive_db/
-│   ├── main.py      # Точка входа с функцией main()
-│   └── engine.py    # Логика работы с БД
-├── pyproject.toml   # Конфигурация Poetry
-├── Makefile         # Автоматизация команд
-└── README.md        # Документация
+├── .gitignore
+├── Makefile          # Автоматизация команд
+├── README.md         # Документация
+├── pyproject.toml    # Конфигурация Poetry
+├── poetry.lock
+└── src/
+    ├── __init__.py
+    └── primitive_db/
+        ├── __init__.py
+        ├── main.py    # Точка входа с функцией main()
+        ├── engine.py  # Логика работы с БД
+        ├── core.py
+        └── utils.py
 ```
 
 ## Структура данных:
