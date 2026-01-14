@@ -24,23 +24,29 @@
 - `delete from <имя_таблицы> where <столбец> = <значение>` — удалить запись из таблицы по условию;
 - `info <имя_таблицы>` - информация о таблице
 
-## Пример использования CRUD-операции: (в разработке)
+## Пример использования CRUD-операции:
 
 ### Примеры команд:
 ```
+# создание таблицы
+create_table users name:str age:int is_active:bool
+create_table products title:str price:int in_stock:bool
+
 # создание записи
-insert into users values ("Sergei", 28, true)
+insert into users values ("Мария", 28, true)
+insert into users values ("Анна", 25, true)
+insert into users values ("Иван", 30, false)
 
 # просмотр всех записей
 select from users
 select from users where age = 28
 
 # обновление записи
-update users set age = 28 where name = "Sergei"
+update users set age = 27 where name = "Мария"
 
 # удаление записи
 delete from users where ID = 1
-delete from users where name = "Sergei"
+delete from users where name = "Мария"
 
 # Информация о таблице
 info users
