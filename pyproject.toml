@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "project2_Mishra_Alla_nod"
+name = "project2_Mishra_nod"
 version = "0.1.0"
 description = "primitive DB project"
 authors = ["mishra-alla <allasr22@yandex.ru>"]
