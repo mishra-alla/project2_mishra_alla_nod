@@ -5,14 +5,17 @@
 import json
 import os
 from prettytable import PrettyTable
-
+from .decorators import handle_db_errors, confirm_action, log_time, query_cacher
 
 # Поддерживаемые типы данных
 SUPPORTED_TYPES = {"int", "str", "bool"}
 
 
+@handle_db_errors
 def create_table(metadata, table_name, columns):
-    """создание таблицы"""
+    """
+    создание таблицы
+    """
     if table_name in metadata:
         print(f'Ошибка: Таблица "{table_name}" уже существует.')
         return None
@@ -35,7 +38,9 @@ def create_table(metadata, table_name, columns):
     return metadata
 
 
-def drop_table(metadata, table_name):
+@handle_db_errors
+@confirm_action("удаление таблицы")
+def drop_table(metadata, table_name, confirm=True):
     """
     удаление таблицы
     """
@@ -44,10 +49,17 @@ def drop_table(metadata, table_name):
         return None
 
     del metadata[table_name]
+    
+    # Удаляем файл с данными если он существует
+    data_file = f'data/{table_name}.json'
+    if os.path.exists(data_file):
+        os.remove(data_file)
+    
     print(f'Таблица "{table_name}" успешно удалена.')
     return metadata
 
 
+@handle_db_errors
 def list_tables(metadata):
     """
     список всех таблиц
@@ -108,6 +120,8 @@ def _parse_value(value, expected_type):
     return value
 
 
+@handle_db_errors
+@log_time
 def insert(metadata, table_name, values):
     """
     вставка данных в таблицу
@@ -156,6 +170,9 @@ def insert(metadata, table_name, values):
     table_data.append(record)
     _save_table_data(table_name, table_data)
     
+    # Очищаем кэш для этой таблицы
+    query_cacher.clear()
+    
     print(f'Запись с ID={new_id} успешно добавлена в таблицу "{table_name}".')
     return table_data
 
@@ -170,6 +187,8 @@ def _parse_where(where_clause):
     return None, None
 
 
+@handle_db_errors
+@log_time
 def select(metadata, table_name, where_clause=None):
     """
     выборка данных из таблицы
@@ -178,62 +197,72 @@ def select(metadata, table_name, where_clause=None):
         print(f'Ошибка: Таблица "{table_name}" не существует.')
         return
 
-    table_data = _load_table_data(table_name)
-    
-    if not table_data:
-        print(f'Таблица "{table_name}" пуста.')
-        return
-    
-    # Фильтруем данные если есть условие
-    filtered_data = table_data
-    if where_clause:
-        column, value = _parse_where(where_clause)
-        if not column:
-            print('Некорректное условие WHERE.')
+    # Функция для выполнения запроса (будет кэшироваться)
+    def _execute_select():
+        table_data = _load_table_data(table_name)
+        
+        if not table_data:
+            print(f'Таблица "{table_name}" пуста.')
             return
         
-        # Определяем тип столбца для парсинга значения
-        col_type = 'str'
-        for col_schema in metadata[table_name]:
-            col_name, col_type_str = col_schema.split(':')
-            if col_name == column:
-                col_type = col_type_str
-                break
+        # Фильтруем данные если есть условие
+        filtered_data = table_data
+        if where_clause:
+            column, value = _parse_where(where_clause)
+            if not column:
+                print('Некорректное условие WHERE.')
+                return
+            
+            # Определяем тип столбца для парсинга значения
+            col_type = 'str'
+            for col_schema in metadata[table_name]:
+                col_name, col_type_str = col_schema.split(':')
+                if col_name == column:
+                    col_type = col_type_str
+                    break
+            
+            try:
+                parsed_value = _parse_value(value, col_type)
+            except ValueError as e:
+                print(f'Ошибка в условии WHERE: {e}')
+                return
+            
+            # Фильтруем записи
+            filtered_data = [
+                record for record in table_data 
+                if str(record.get(column, '')) == str(parsed_value)
+            ]
         
-        try:
-            parsed_value = _parse_value(value, col_type)
-        except ValueError as e:
-            print(f'Ошибка в условии WHERE: {e}')
+        if not filtered_data:
+            print('Записи не найдены.')
             return
         
-        # Фильтруем записи
-        filtered_data = [
-            record for record in table_data 
-            if str(record.get(column, '')) == str(parsed_value)
-        ]
+        # Создаём таблицу для вывода
+        table = PrettyTable()
+        table.field_names = [col.split(':')[0] for col in metadata[table_name]]
+        
+        for record in filtered_data:
+            row = []
+            for col in metadata[table_name]:
+                col_name = col.split(':')[0]
+                value = record.get(col_name, '')
+                if isinstance(value, bool):
+                    row.append(str(value))
+                else:
+                    row.append(str(value))
+            table.add_row(row)
+        
+        print(table)
+        return filtered_data
     
-    if not filtered_data:
-        print('Записи не найдены.')
-        return
+    # Создаём ключ для кэша
+    cache_key = f"select_{table_name}_{where_clause}"
     
-    # Создаём таблицу для вывода
-    table = PrettyTable()
-    table.field_names = [col.split(':')[0] for col in metadata[table_name]]
-    
-    for record in filtered_data:
-        row = []
-        for col in metadata[table_name]:
-            col_name = col.split(':')[0]
-            value = record.get(col_name, '')
-            if isinstance(value, bool):
-                row.append(str(value))
-            else:
-                row.append(str(value))
-        table.add_row(row)
-    
-    print(table)
+    # Используем кэш
+    return query_cacher(cache_key, _execute_select)
 
 
+@handle_db_errors
 def update(metadata, table_name, set_clause, where_clause):
     """
     обновление данных в таблице
@@ -287,11 +316,17 @@ def update(metadata, table_name, set_clause, where_clause):
         return None
     
     _save_table_data(table_name, table_data)
+    
+    # Очищаем кэш
+    query_cacher.clear()
+    
     print(f'Успешно обновлено {updated_count} записей в таблице "{table_name}".')
     return table_data
 
 
-def delete(metadata, table_name, where_clause):
+@handle_db_errors
+@confirm_action("удаление записей")
+def delete(metadata, table_name, where_clause, confirm=True):
     """
     удаление данных из таблицы
     """
@@ -340,10 +375,15 @@ def delete(metadata, table_name, where_clause):
         return None
     
     _save_table_data(table_name, filtered_data)
+    
+    # Очищаем кэш
+    query_cacher.clear()
+    
     print(f'Успешно удалено {deleted_count} записей из таблицы "{table_name}".')
     return filtered_data
 
 
+@handle_db_errors
 def info(metadata, table_name):
     """
     информация о таблице
