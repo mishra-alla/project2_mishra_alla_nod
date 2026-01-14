@@ -2,7 +2,7 @@
 from src.primitive_db.engine import run
 
 
-def main()-> None:
+def main() -> None:
     """Функция запускающая проект"""
     run()
 

@@ -47,3 +47,12 @@ tmp/
 # OS
 .DS_Store
 Thumbs.db
+
+# Тестовые файлы
+test_*.py
+demo*.py
+*.cast
+
+# Временные файлы
+db_meta.json
+data/

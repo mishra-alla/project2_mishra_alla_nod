@@ -51,11 +51,11 @@ delete from users where name = "Мария"
 # Информация о таблице
 info users
 ```
-
-## Обработка ошибок:
-- `KeyError` - обращение к несуществующим таблицам
-- `ValueError` - ошибки валидации типов данных
-- `FileNotFoundError` - проблемы с файлами данных
+## Реализованные декораторы:
+- `@handle_db_errors` - обработка исключений ( FileNotFoundError, KeyError, ValueError)
+- `@confirm_action("действие")` - запрос подтверждения для опасных операций
+- `@log_time` - замер времени выполнения функций
+- `create_cacher()` - фабрика функций с замыканием
 
 ## Архитектура проекта:
 Проект состоит из следующих модулей:
@@ -78,6 +78,7 @@ project2_Mishra_Alla_nod/
     ├── __init__.py
     └── primitive_db/
         ├── __init__.py
+        ├── decorators.py # Декораторы
         ├── main.py    # Точка входа с функцией main()
         ├── engine.py  # Логика работы с БД
         ├── core.py
