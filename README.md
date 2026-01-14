@@ -64,6 +64,17 @@ delete from users where name = "John"
 - `parser.py` - парсинг условий и вводимых выражений
 - `decorators.py` - система декораторов
 
+## Структура проекта:
+```
+project2_Mishra_Alla_nod/
+├── src/primitive_db/
+│   ├── main.py      # Точка входа с функцией main()
+│   └── engine.py    # Логика работы с БД
+├── pyproject.toml   # Конфигурация Poetry
+├── Makefile         # Автоматизация команд
+└── README.md        # Документация
+```
+
 ## Структура данных:
 - Метаданные: хранятся в db_meta.json
 - Данные таблиц: каждая таблица хранится в отдельном файле в папке data
@@ -76,12 +87,25 @@ cd project2_Mishra_Alla
 
 # Установка зависимостей
 poetry install      # через poetry
-poetry run project  # через Makefile
+make install  # через Makefile
 
 ## Запуск
 poetry run project  # через poetry
-make project.       # через Makefile
+make project        # через Makefile
 ```
+### Установка как пакет
+```
+bash
+# Собрать пакет
+make build
+
+# Установить пакет
+make package-install
+
+# Запустить
+project
+```
+
 > Убедитесь, что у вас установлены: Python 3.12 Poetry и/или make
 
 ## Автор
